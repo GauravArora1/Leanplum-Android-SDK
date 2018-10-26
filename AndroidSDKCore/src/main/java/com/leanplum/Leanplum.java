@@ -55,11 +55,9 @@ import com.leanplum.utils.BuildUtil;
 import com.leanplum.utils.SharedPreferencesUtil;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -109,6 +107,8 @@ public class Leanplum {
   private static Runnable pushStartCallback;
 
   private static CountAggregator countAggregator = new CountAggregator();
+
+  private static boolean hasLeanplumSyncedAtleastOnce;
 
   private Leanplum() {
   }
@@ -1020,7 +1020,7 @@ public class Leanplum {
   }
 
   private static void pauseInternal() {
-    Request.post(Constants.Methods.PAUSE_SESSION, null).sendIfConnected();
+    Request.post(Constants.Methods.PAUSE_SESSION, null).sendEventually();
     pauseHeartbeat();
     LeanplumInternal.setIsPaused(true);
   }
@@ -1057,14 +1057,23 @@ public class Leanplum {
     Request request = Request.post(Constants.Methods.RESUME_SESSION, null);
     if (LeanplumInternal.hasStartedInBackground()) {
       LeanplumInternal.setStartedInBackground(false);
-      request.sendIfConnected();
+      syncEfficiently(request);
     } else {
-      request.sendIfDelayed();
+      syncEfficiently(request);
       LeanplumInternal.maybePerformActions("resume", null,
           LeanplumMessageMatchFilter.LEANPLUM_ACTION_FILTER_ALL, null, null);
     }
     resumeHeartbeat();
     LeanplumInternal.setIsPaused(false);
+  }
+
+  private static void syncEfficiently(Request request){
+    if(hasLeanplumSyncedAtleastOnce) {
+      request.sendEventually();
+    } else {
+      request.sendIfConnected();
+    }
+    hasLeanplumSyncedAtleastOnce = true;
   }
 
   /**
