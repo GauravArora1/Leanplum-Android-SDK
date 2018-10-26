@@ -230,7 +230,7 @@ public class Request implements LPRequesting {
         Log.LeanplumLogType.DEBUG : Log.LeanplumLogType.VERBOSE;
     Log.log(level, "Will call API method " + apiMethod + " with arguments " + params);
     Leanplum.countAggregator().incrementCount("get_request");
-    return RequestFactory.getInstance().createRequest("GET", apiMethod, params);
+    return new Request("GET", apiMethod, params);
   }
 
   public static Request post(String apiMethod, Map<String, Object> params) {
@@ -238,7 +238,7 @@ public class Request implements LPRequesting {
         Log.LeanplumLogType.DEBUG : Log.LeanplumLogType.VERBOSE;
     Log.log(level, "Will call API method " + apiMethod + " with arguments " + params);
     Leanplum.countAggregator().incrementCount("post_request");
-    return RequestFactory.getInstance().createRequest("POST", apiMethod, params);
+    return new Request("POST", apiMethod, params);
   }
 
   public void onResponse(ResponseCallback response) {

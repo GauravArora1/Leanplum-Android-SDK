@@ -54,14 +54,24 @@ public class RequestFactory {
   private static final String API_METHOD_MARK_INBOX_MESSAGE_AS_READ = "markNewsfeedMessageAsRead";
   private static final String API_METHOD_DELETE_INBOX_MESSAGE = "deleteNewsfeedMessage";
 
-  public static RequestFactory defaultFactory;
+  //public static RequestFactory defaultFactory;
 
-  public synchronized static RequestFactory getInstance() {
+  /*public synchronized static RequestFactory getInstance() {
     if (defaultFactory == null) {
       defaultFactory = new RequestFactory();
     }
     return defaultFactory;
+  }*/
+
+  private final CountAggregator countAggregator;
+  private final FeatureFlagManager featureFlagManager;
+
+  RequestFactory(CountAggregator countAggregator, FeatureFlagManager featureFlagManager) {
+    this.countAggregator = countAggregator;
+    this.featureFlagManager = featureFlagManager;
   }
+
+
 
   public Request createRequest(
       String httpMethod, String apiMethod, Map<String, Object> params) {
